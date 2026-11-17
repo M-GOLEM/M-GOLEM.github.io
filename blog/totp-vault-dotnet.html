@@ -3,30 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits — Mr.GOLEM</title>
+<title>Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits — Mr Sayrws</title>
 <meta name="description" content="The math behind six-digit codes, how to store the shared secrets, and why a hard-coded PIN check quietly ruins the whole design.">
-<meta name="author" content="Mr.GOLEM">
-<link rel="canonical" href="https://m-golem.github.io/blog/totp-vault-dotnet.html">
+<meta name="author" content="Mr Sayrws">
+<link rel="canonical" href="https://mrsayrws.github.io/blog/totp-vault-dotnet.html">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits — Mr.GOLEM">
+<meta property="og:title" content="Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits — Mr Sayrws">
 <meta property="og:description" content="The math behind six-digit codes, how to store the shared secrets, and why a hard-coded PIN check quietly ruins the whole design.">
-<meta property="og:url" content="https://m-golem.github.io/blog/totp-vault-dotnet.html">
-<meta property="og:image" content="https://m-golem.github.io/assets/og.png">
+<meta property="og:url" content="https://mrsayrws.github.io/blog/totp-vault-dotnet.html">
+<meta property="og:image" content="https://mrsayrws.github.io/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://m-golem.github.io/assets/og.png">
-<link rel="alternate" type="application/rss+xml" title="Mr.GOLEM — Writing" href="https://m-golem.github.io/feed.xml">
+<meta name="twitter:image" content="https://mrsayrws.github.io/assets/og.png">
+<link rel="alternate" type="application/rss+xml" title="Mr Sayrws — Writing" href="https://mrsayrws.github.io/feed.xml">
 <link rel="stylesheet" href="/assets/site.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://m-golem.github.io/"}, {"@type": "ListItem", "position": 2, "name": "Writing", "item": "https://m-golem.github.io/blog/"}, {"@type": "ListItem", "position": 3, "name": "Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits", "item": "https://m-golem.github.io/blog/totp-vault-dotnet.html"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits","description":"The math behind six-digit codes, how to store the shared secrets, and why a hard-coded PIN check quietly ruins the whole design.","url":"https://m-golem.github.io/blog/totp-vault-dotnet.html","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Mr.GOLEM","url":"https://m-golem.github.io/","sameAs":["https://github.com/M-GOLEM","https://www.youtube.com/@golemsec"]},"publisher":{"@type":"Person","name":"Mr.GOLEM"},"mainEntityOfPage":"https://m-golem.github.io/blog/totp-vault-dotnet.html","image":"https://m-golem.github.io/assets/og.png"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mrsayrws.github.io/"}, {"@type": "ListItem", "position": 2, "name": "Writing", "item": "https://mrsayrws.github.io/blog/"}, {"@type": "ListItem", "position": 3, "name": "Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits", "item": "https://mrsayrws.github.io/blog/totp-vault-dotnet.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits","description":"The math behind six-digit codes, how to store the shared secrets, and why a hard-coded PIN check quietly ruins the whole design.","url":"https://mrsayrws.github.io/blog/totp-vault-dotnet.html","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Mr Sayrws","url":"https://mrsayrws.github.io/","sameAs":["https://github.com/mrsayrws","https://www.youtube.com/@mrsayrws"]},"publisher":{"@type":"Person","name":"Mr Sayrws"},"mainEntityOfPage":"https://mrsayrws.github.io/blog/totp-vault-dotnet.html","image":"https://mrsayrws.github.io/assets/og.png"}</script>
 </head>
 <body><div class="wrap">
 <nav class="top">
-  <a class="brand" href="/">Mr.GOLEM</a>
+  <a class="brand" href="/">Mr Sayrws</a>
   <a href="/">Home</a>
   <a href="/blog/">Writing</a>
   <a href="/press.html">Press</a>
-  <a href="https://github.com/M-GOLEM">GitHub</a>
-  <a href="https://www.youtube.com/@golemsec">YouTube</a>
+  <a href="https://github.com/mrsayrws">GitHub</a>
+  <a href="https://www.youtube.com/@mrsayrws">YouTube</a>
 </nav>
 <main>
 
@@ -118,26 +118,26 @@ factor, not a substitute for one.</p>
 </ol>
 
 <div class="note"><strong>Tooling note.</strong>
-<a href="https://github.com/M-GOLEM/App2FA">App2FA</a> is my WinForms TOTP vault:
+<a href="https://github.com/mrsayrws/App2FA">App2FA</a> is my WinForms TOTP vault:
 RFC 6238 codes, AES-256-GCM, PBKDF2-SHA512 at 300k iterations, QR import and
 offline storage. Its README also documents the hard-coded PIN check that makes it
 a personal tool rather than a hardened product — read that before trusting it
 with real accounts.</div>
 
-<p>The video breakdown is on <a href="https://www.youtube.com/@golemsec">GOLEM
+<p>The video breakdown is on <a href="https://www.youtube.com/@mrsayrws">GOLEM
 SEC</a>.</p>
 <div class="note" style="margin-top:34px"><strong>Read next</strong><ul style="margin:8px 0 0"><li><a href="/blog/discord-token-grabbers.html">Discord token grabbers</a></li><li><a href="/blog/adb-fastboot-windows-guide.html">ADB and fastboot on Windows</a></li><li><a href="/blog/android-dns-ad-blocking.html">DNS ad blocking without root</a></li></ul></div><div class="authorbox">
-  <img src="https://github.com/M-GOLEM.png" alt="Mr.GOLEM" width="64" height="64">
-  <p><strong>Mr.GOLEM</strong> — reverse engineer, malware analyst and YouTuber.
+  <img src="https://github.com/mrsayrws.png" alt="Mr Sayrws" width="64" height="64">
+  <p><strong>Mr Sayrws</strong> — reverse engineer, malware analyst and YouTuber.
   I write about binaries, Windows internals and defensive tooling, and show the
-  work on <a href="https://www.youtube.com/@golemsec">GOLEM SEC</a>.</p>
+  work on <a href="https://www.youtube.com/@mrsayrws">Mr Sayrws</a>.</p>
 </div>
 </main>
 <footer>
-  <div>© 2026 Mr.GOLEM · no trackers, no cookies, no analytics.</div>
+  <div>© 2026 Mr Sayrws · no trackers, no cookies, no analytics.</div>
   <div class="links">
-    <a href="https://github.com/M-GOLEM">GitHub</a>
-    <a href="https://www.youtube.com/@golemsec">YouTube</a>
+    <a href="https://github.com/mrsayrws">GitHub</a>
+    <a href="https://www.youtube.com/@mrsayrws">YouTube</a>
     <a href="https://hellstorm.blog">Blog</a>
     <a href="/feed.xml">RSS</a>
     <a href="mailto:golem-hack@agentmail.to">Email</a>
