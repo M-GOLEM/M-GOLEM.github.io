@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ADB and fastboot on Windows: a practical diagnostic guide — Mr.GOLEM</title>
+<meta name="description" content="Set up platform-tools, authorise the device, read the right properties and tell ADB, fastboot, download mode, EDL and preloader apart — without flashing anything.">
+<meta name="author" content="Mr.GOLEM">
+<link rel="canonical" href="https://m-golem.github.io/blog/adb-fastboot-windows-guide.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ADB and fastboot on Windows: a practical diagnostic guide — Mr.GOLEM">
+<meta property="og:description" content="Set up platform-tools, authorise the device, read the right properties and tell ADB, fastboot, download mode, EDL and preloader apart — without flashing anything.">
+<meta property="og:url" content="https://m-golem.github.io/blog/adb-fastboot-windows-guide.html">
+<meta property="og:image" content="https://m-golem.github.io/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://m-golem.github.io/assets/og.png">
+<link rel="alternate" type="application/rss+xml" title="Mr.GOLEM — Writing" href="https://m-golem.github.io/feed.xml">
+<link rel="stylesheet" href="/assets/site.css">
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"ADB and fastboot on Windows: a practical diagnostic guide","description":"Set up platform-tools, authorise the device, read the right properties and tell ADB, fastboot, download mode, EDL and preloader apart — without flashing anything.","url":"https://m-golem.github.io/blog/adb-fastboot-windows-guide.html","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Mr.GOLEM","url":"https://m-golem.github.io/","sameAs":["https://github.com/M-GOLEM","https://www.youtube.com/@golemsec"]},"publisher":{"@type":"Person","name":"Mr.GOLEM"},"mainEntityOfPage":"https://m-golem.github.io/blog/adb-fastboot-windows-guide.html","image":"https://m-golem.github.io/assets/og.png"}</script>
+</head>
+<body><div class="wrap">
+<nav class="top">
+  <a class="brand" href="/">Mr.GOLEM</a>
+  <a href="/">Home</a>
+  <a href="/blog/">Writing</a>
+  <a href="/press.html">Press</a>
+  <a href="https://github.com/M-GOLEM">GitHub</a>
+  <a href="https://www.youtube.com/@golemsec">YouTube</a>
+</nav>
+<main>
+
+<h1>ADB and fastboot on Windows: <span>a diagnostic guide</span></h1>
+<div class="meta">Android · 17 Nov 2026 · 9 min read</div>
+
+<p class="lead">Most "my tablet is dead" cases are a cable, a driver or an
+authorisation prompt — not a broken device. ADB answers the question "is the
+software alive?" before anyone reaches for a firmware package.</p>
+
+<p>Everything below is read-only diagnostics on a device you own. Nothing here
+flashes, unlocks or wipes anything.</p>
+
+<h2>1. Install only platform-tools</h2>
+<p>You do not need Android Studio. Download Google's
+<a href="https://developer.android.com/tools/releases/platform-tools">platform-tools</a>
+zip, extract it to a fixed path such as <code>C:\platform-tools</code>, and add
+that folder to <code>PATH</code>. Verify:</p>
+<pre><code>adb version
+fastboot --version</code></pre>
+<p>On Windows, use a data-capable USB cable and a rear-panel port on a desktop.
+Front-panel ports and charge-only cables cause more "device not found" reports
+than any driver issue.</p>
+
+<h2>2. Authorise the connection</h2>
+<pre><code>adb devices -l</code></pre>
+<p>The four states mean different things:</p>
+<ul>
+  <li><code>device</code> — authorised and ready.</li>
+  <li><code>unauthorized</code> — accept the RSA fingerprint prompt on the device.
+  If the prompt does not appear, revoke USB debugging authorisations in Developer
+  options and reconnect.</li>
+  <li><code>offline</code> — usually a stale server. <code>adb kill-server</code>,
+  then <code>adb start-server</code>.</li>
+  <li>empty list — cable, port, driver or "USB debugging" is off.</li>
+</ul>
+
+<h2>3. Read the device before touching it</h2>
+<pre><code>adb shell getprop ro.product.model
+adb shell getprop ro.build.version.release
+adb shell getprop ro.build.fingerprint
+adb shell dumpsys battery
+adb shell wm size
+adb shell wm density
+adb shell df -h /data</code></pre>
+<p>These five minutes of output tell you the model, firmware build, battery
+health, display configuration and free space. That is the difference between
+"it boots to a logo" and a useful bug report.</p>
+
+<h3>Third-party packages and logs</h3>
+<pre><code>adb shell pm list packages -3
+adb logcat -d -v time *:E</code></pre>
+<p>Filter logcat by PID or tag once you know which app crashes. A full unfiltered
+dump is noise; an error-level dump around the failure is evidence.</p>
+
+<h2>4. Capture what the screen shows</h2>
+<pre><code>adb exec-out screencap -p > screen.png
+adb shell screenrecord --time-limit 20 /sdcard/demo.mp4
+adb pull /sdcard/demo.mp4</code></pre>
+<p>A screenshot of the recovery or error screen is often more useful than a
+description, and it survives the device being wiped later.</p>
+
+<h2>5. Know which mode you are actually in</h2>
+<p>"Fastboot" is not a universal rescue mode. The connection mode determines
+which tool can talk to the device at all:</p>
+<ul>
+  <li><strong>ADB</strong> — Android is booted; debugging is on.</li>
+  <li><strong>fastboot</strong> — bootloader is up; <code>fastboot devices</code>
+  should list it. <code>getvar all</code> is safe and informative:
+  <code>fastboot getvar all</code>.</li>
+  <li><strong>Samsung download mode</strong> — Odin/Heimdall territory, not fastboot.</li>
+  <li><strong>Qualcomm EDL (9008)</strong> — a serial download mode; tools and
+  firehose loaders are per-OEM. Treat it as a last resort; one wrong load can
+  brick a device.</li>
+  <li><strong>MediaTek preloader / BROM</strong> — another vendor-specific path.</li>
+  <li><strong>Spreadtrum</strong> — its own download tool.</li>
+</ul>
+
+<h2>6. Drivers: identify, do not guess</h2>
+<p>Open Device Manager and look at the VID/PID and the device class. A yellow
+mark on "Android" or "Unknown device" means the mode is not bound to a driver.
+Google's USB driver covers Nexus/Pixel; Samsung, Qualcomm and MediaTek modes need
+their own vendor drivers. Installing a random "universal ADB driver" pack is a
+good way to break a working setup.</p>
+
+<h2>7. What not to do</h2>
+<ul>
+  <li>Do not flash a firmware package you cannot verify against the model and
+  region. Cross-flashing is how devices lose their IMEI or boot loop.</li>
+  <li>Do not run EDL/firehose packages from unknown sources.</li>
+  <li>Do not lock the bootloader on a device with a custom image unless you have
+  read the vendor's exact procedure.</li>
+  <li>Do not use these steps on a device you do not own.</li>
+</ul>
+
+<div class="note"><strong>Tooling note.</strong>
+<a href="https://github.com/M-GOLEM/GOLEM-TABLET">GOLEM-TABLET</a> wraps exactly
+this workflow on Windows: device-mode classification, ADB diagnostics, fastboot
+<code>getvar</code>, driver error codes, and validation of Samsung/Qualcomm
+firmware packages. It intentionally does <em>not</em> flash.</div>
+
+<p>The video version, including the mode-detection demo, is on
+<a href="https://www.youtube.com/@golemsec">GOLEM SEC</a>.</p>
+<div class="authorbox">
+  <img src="https://github.com/M-GOLEM.png" alt="Mr.GOLEM" width="64" height="64">
+  <p><strong>Mr.GOLEM</strong> — reverse engineer, malware analyst and YouTuber.
+  I write about binaries, Windows internals and defensive tooling, and show the
+  work on <a href="https://www.youtube.com/@golemsec">GOLEM SEC</a>.</p>
+</div>
+</main>
+<footer>
+  <div>© 2026 Mr.GOLEM · no trackers, no cookies, no analytics.</div>
+  <div class="links">
+    <a href="https://github.com/M-GOLEM">GitHub</a>
+    <a href="https://www.youtube.com/@golemsec">YouTube</a>
+    <a href="https://hellstorm.blog">Blog</a>
+    <a href="/feed.xml">RSS</a>
+    <a href="mailto:golem-hack@agentmail.to">Email</a>
+  </div>
+</footer>
+</div></body>
+</html>
