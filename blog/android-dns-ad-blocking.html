@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DNS ad blocking on Android without root: how VpnService filters work — Mr.GOLEM</title>
+<meta name="description" content="Why a local VPN can block ads system-wide without root, what it sees, and the four cases where DNS filtering still loses.">
+<meta name="author" content="Mr.GOLEM">
+<link rel="canonical" href="https://m-golem.github.io/blog/android-dns-ad-blocking.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DNS ad blocking on Android without root: how VpnService filters work — Mr.GOLEM">
+<meta property="og:description" content="Why a local VPN can block ads system-wide without root, what it sees, and the four cases where DNS filtering still loses.">
+<meta property="og:url" content="https://m-golem.github.io/blog/android-dns-ad-blocking.html">
+<meta property="og:image" content="https://m-golem.github.io/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://m-golem.github.io/assets/og.png">
+<link rel="alternate" type="application/rss+xml" title="Mr.GOLEM — Writing" href="https://m-golem.github.io/feed.xml">
+<link rel="stylesheet" href="/assets/site.css">
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"DNS ad blocking on Android without root: how VpnService filters work","description":"Why a local VPN can block ads system-wide without root, what it sees, and the four cases where DNS filtering still loses.","url":"https://m-golem.github.io/blog/android-dns-ad-blocking.html","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Mr.GOLEM","url":"https://m-golem.github.io/","sameAs":["https://github.com/M-GOLEM","https://www.youtube.com/@golemsec"]},"publisher":{"@type":"Person","name":"Mr.GOLEM"},"mainEntityOfPage":"https://m-golem.github.io/blog/android-dns-ad-blocking.html","image":"https://m-golem.github.io/assets/og.png"}</script>
+</head>
+<body><div class="wrap">
+<nav class="top">
+  <a class="brand" href="/">Mr.GOLEM</a>
+  <a href="/">Home</a>
+  <a href="/blog/">Writing</a>
+  <a href="/press.html">Press</a>
+  <a href="https://github.com/M-GOLEM">GitHub</a>
+  <a href="https://www.youtube.com/@golemsec">YouTube</a>
+</nav>
+<main>
+
+<h1>DNS ad blocking on Android <span>without root</span></h1>
+<div class="meta">Android · 17 Nov 2026 · 7 min read</div>
+
+<p class="lead">Most mobile ads start with a DNS lookup. Block the lookup and the
+ad never loads — no root, no browser extension, and it works inside apps.</p>
+
+<p>Android exposes this through <code>VpnService</code>. The name is misleading:
+the app does not need a remote VPN server, and it does not need to see your
+traffic. It can capture DNS and leave everything else alone.</p>
+
+<h2>The packet path</h2>
+<ol>
+  <li>The app calls <code>VpnService.Builder</code> and adds a DNS server address
+  that points back into its own tunnel.</li>
+  <li>Android creates a <code>tun</code> interface. The app reads raw IP packets
+  from it.</li>
+  <li>For each UDP packet to port 53, the app parses the DNS header and question
+  name.</li>
+  <li>The name, and its parent domains, are checked against the blocklist.</li>
+  <li>Blocked: the app writes an <code>NXDOMAIN</code> response back into the
+  tunnel. Allowed: it forwards the query to a real resolver and copies the answer
+  back.</li>
+</ol>
+<p>No root, no iptables, and no traffic leaves through a third-party server. The
+app is a DNS proxy, not a tunnel for your browsing.</p>
+
+<h2>Making lookups fast</h2>
+<p>A hosts-style list with a few hundred thousand entries is too slow to scan per
+query. Two changes make it practical:</p>
+<ul>
+  <li>Store each domain as a 64-bit hash in a sorted array and use binary search —
+  memory stays small and lookup is O(log n).</li>
+  <li>Cache the compiled array on disk, so only the first start pays the parse
+  cost.</li>
+</ul>
+<p>Hashing also avoids keeping a readable list of every blocked domain in memory,
+which is a small privacy win. Collisions are possible in theory; with 64 bits and
+a few hundred thousand entries they are negligible for this use.</p>
+
+<h2>Choosing lists</h2>
+<p>More lists is not always better. A balanced set blocks ad and tracker domains
+without breaking logins, payments or app updates. An "ultimate" set will block
+more ads and also more legitimate first-party endpoints. The right level depends
+on how much breakage you tolerate.</p>
+
+<h2>The four cases where DNS filtering loses</h2>
+<h3>1. DNS-over-HTTPS / Private DNS</h3>
+<p>If the app or the OS resolves names over HTTPS, the query never reaches your
+port-53 listener. On Android 9+, <em>Private DNS</em> must be off (or set to
+"Automatic") for system-wide filtering. Browsers with their own secure DNS need
+the same setting disabled.</p>
+<h3>2. Same-domain ads</h3>
+<p>When the ad is served from the same host as the content — some video and feed
+ads — blocking the domain blocks the content too. DNS cannot separate them.</p>
+<h3>3. One VPN at a time</h3>
+<p>Android allows a single active VPN. A corporate or privacy VPN will conflict
+with the blocker; only one can run.</p>
+<h3>4. Hard-coded IPs</h3>
+<p>An SDK that talks straight to an IP address bypasses DNS entirely. That is
+rare for ads, common for telemetry.</p>
+
+<h2>Privacy trade-offs</h2>
+<p>A DNS blocker sees every domain you resolve. That is a real position of trust.
+Good implementations keep the data local, publish no analytics, and let you pick
+the upstream resolver. Note that the upstream resolver — Cloudflare, Google, your
+ISP — still sees allowed queries. Moving DNS does not make you anonymous.</p>
+
+<h2>Practical setup</h2>
+<ol>
+  <li>Install the blocker and grant the VPN permission. The OS warning is
+  expected; check that the app routes only DNS.</li>
+  <li>Disable Private DNS while the blocker is active.</li>
+  <li>Exclude the app from battery optimisation if protection dies after reboot.</li>
+  <li>Start on a balanced list; move to a stronger one only if you accept breakage.</li>
+  <li>Keep one browser without the blocker for banking or logins that misbehave,
+  so you can tell "site is down" from "my filter broke it".</li>
+</ol>
+
+<div class="note"><strong>Tooling note.</strong>
+<a href="https://github.com/M-GOLEM/Ad-Blocker">Ad-Blocker</a> implements this
+model in Kotlin: a local <code>VpnService</code>, IPv4/UDP DNS parsing, hashed
+blocklists with binary search, three list levels and on-device statistics.</div>
+
+<p>A visual walkthrough is on <a href="https://www.youtube.com/@golemsec">GOLEM
+SEC</a>.</p>
+<div class="authorbox">
+  <img src="https://github.com/M-GOLEM.png" alt="Mr.GOLEM" width="64" height="64">
+  <p><strong>Mr.GOLEM</strong> — reverse engineer, malware analyst and YouTuber.
+  I write about binaries, Windows internals and defensive tooling, and show the
+  work on <a href="https://www.youtube.com/@golemsec">GOLEM SEC</a>.</p>
+</div>
+</main>
+<footer>
+  <div>© 2026 Mr.GOLEM · no trackers, no cookies, no analytics.</div>
+  <div class="links">
+    <a href="https://github.com/M-GOLEM">GitHub</a>
+    <a href="https://www.youtube.com/@golemsec">YouTube</a>
+    <a href="https://hellstorm.blog">Blog</a>
+    <a href="/feed.xml">RSS</a>
+    <a href="mailto:golem-hack@agentmail.to">Email</a>
+  </div>
+</footer>
+</div></body>
+</html>
