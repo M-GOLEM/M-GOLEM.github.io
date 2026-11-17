@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Discord token grabbers work — and how to stop them — Mr.GOLEM</title>
+<meta name="description" content="A token is a bearer credential: whoever holds it is you. This is how grabbers find it, why file-only antivirus misses them, and the checks that actually help.">
+<meta name="author" content="Mr.GOLEM">
+<link rel="canonical" href="https://m-golem.github.io/blog/discord-token-grabbers.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How Discord token grabbers work — and how to stop them — Mr.GOLEM">
+<meta property="og:description" content="A token is a bearer credential: whoever holds it is you. This is how grabbers find it, why file-only antivirus misses them, and the checks that actually help.">
+<meta property="og:url" content="https://m-golem.github.io/blog/discord-token-grabbers.html">
+<meta property="og:image" content="https://m-golem.github.io/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://m-golem.github.io/assets/og.png">
+<link rel="alternate" type="application/rss+xml" title="Mr.GOLEM — Writing" href="https://m-golem.github.io/feed.xml">
+<link rel="stylesheet" href="/assets/site.css">
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"How Discord token grabbers work — and how to stop them","description":"A token is a bearer credential: whoever holds it is you. This is how grabbers find it, why file-only antivirus misses them, and the checks that actually help.","url":"https://m-golem.github.io/blog/discord-token-grabbers.html","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Mr.GOLEM","url":"https://m-golem.github.io/","sameAs":["https://github.com/M-GOLEM","https://www.youtube.com/@golemsec"]},"publisher":{"@type":"Person","name":"Mr.GOLEM"},"mainEntityOfPage":"https://m-golem.github.io/blog/discord-token-grabbers.html","image":"https://m-golem.github.io/assets/og.png"}</script>
+</head>
+<body><div class="wrap">
+<nav class="top">
+  <a class="brand" href="/">Mr.GOLEM</a>
+  <a href="/">Home</a>
+  <a href="/blog/">Writing</a>
+  <a href="/press.html">Press</a>
+  <a href="https://github.com/M-GOLEM">GitHub</a>
+  <a href="https://www.youtube.com/@golemsec">YouTube</a>
+</nav>
+<main>
+
+<h1>How Discord token grabbers work — <span>and how to stop them</span></h1>
+<div class="meta">Defensive notes · 17 Nov 2026 · 8 min read</div>
+
+<p class="lead">A Discord token is not a password. It is a bearer credential: whoever
+holds the string can act as the account without knowing the password, without a
+prompt, and usually without triggering a login notification. That is why stealers
+go after it.</p>
+
+<p>This article is defensive. It explains the storage, the theft path and the
+detection points, without publishing a working grabber.</p>
+
+<h2>Where the token lives</h2>
+<p>On Windows, the Discord desktop client keeps account state in a LevelDB store
+under <code>%APPDATA%\discord\Local Storage\leveldb</code> (with separate
+folders for Canary and PTB). Browsers keep session cookies and site storage in
+their own profiles under <code>%LOCALAPPDATA%</code>.</p>
+<p>Nothing there is plain text by design. Chromium-based browsers encrypt cookie
+values with AES-GCM and protect the key with Windows DPAPI
+(<code>CryptUnprotectData</code>); Discord's own store uses a similar
+DPAPI-backed scheme. The encryption is real — but it is bound to the logged-in
+user, which means any process running as that user can ask Windows to unlock the
+same keys.</p>
+
+<blockquote>Encryption at rest protects a stolen disk. It does not protect a
+running session from code running inside that session.</blockquote>
+
+<h2>The theft path, in five steps</h2>
+<ol>
+  <li><strong>Enumerate.</strong> Look for the known Discord and browser profile
+  folders — including Canary, PTB, Chrome, Edge, Brave, Opera and Yandex.</li>
+  <li><strong>Read.</strong> Copy LevelDB files or SQLite cookie databases. These
+  are read-only operations, which is why file-integrity tools see nothing.</li>
+  <li><strong>Decrypt.</strong> Call DPAPI as the current user, then AES-GCM with
+  the recovered key. No administrator rights are required.</li>
+  <li><strong>Collect.</strong> Add host metadata — username, HWID, public IP —
+  to make the batch easier to sort.</li>
+  <li><strong>Exfiltrate.</strong> POST the bundle to a Discord webhook, a Telegram
+  bot or a random API. A webhook needs no login and blends into Discord traffic.</li>
+</ol>
+
+<h2>Why "don't download cracked software" is not enough</h2>
+<p>Most infections arrive as a "mod", a cheat, a game installer or a fake
+verification step. The executable is often signed with a leaked certificate or
+packed to delay analysis. By the time it runs, the user has already granted the
+only permission that matters: executing code in their own session.</p>
+<p>Two-factor authentication still helps, but it does not save you. A stolen
+token is already past the login step. What 2FA does is limit the damage when the
+attacker tries to change the password, email or connected accounts.</p>
+
+<h2>What actually reduces risk</h2>
+<ul>
+  <li><strong>Run fewer unknown binaries.</strong> Sandbox or VM first, especially
+  for anything that asks you to disable Defender.</li>
+  <li><strong>Isolate browser profiles.</strong> A separate Windows user for
+  "risky" browsing keeps its DPAPI keys separate from your main profile.</li>
+  <li><strong>Watch the seams.</strong> Alert on PowerShell or <code>cmd</code>
+  starting from <code>%TEMP%</code>, on unsigned processes reading
+  <code>leveldb</code>, and on outbound POSTs to <code>discord.com/api/webhooks</code>
+  from user directories.</li>
+  <li><strong>Keep Defender on.</strong> It catches commodity stealers; it will
+  not catch a fresh, packed build. Layer it, do not replace it.</li>
+  <li><strong>Review authorized apps</strong> in Discord settings and remove
+  anything you do not recognise.</li>
+</ul>
+
+<h2>If you think a token was stolen</h2>
+<ol>
+  <li>From a <em>different, clean</em> device: change the password and enable 2FA.</li>
+  <li>In Discord: <em>Settings → Devices</em> → log out all sessions, then
+  <em>Authorized Apps</em> → revoke anything unfamiliar.</li>
+  <li>Check payment methods, server changes and DMs sent in your name.</li>
+  <li>Rotate any other credential that was stored in the same browser profile —
+  a grabber rarely stops at Discord.</li>
+</ol>
+
+<div class="note"><strong>Tooling note.</strong> I built
+<a href="https://github.com/M-GOLEM/StopStealer">StopStealer</a> around these
+detection points: memory signatures for token prefixes and webhook URLs, a
+process guard for script interpreters running from temp folders, and profile
+monitoring that attributes the accessing process before it acts. It is a
+user-mode layer, not an antivirus replacement.</div>
+
+<p>If you want the walkthrough version, the companion video is on
+<a href="https://www.youtube.com/@golemsec">GOLEM SEC</a>.</p>
+<div class="authorbox">
+  <img src="https://github.com/M-GOLEM.png" alt="Mr.GOLEM" width="64" height="64">
+  <p><strong>Mr.GOLEM</strong> — reverse engineer, malware analyst and YouTuber.
+  I write about binaries, Windows internals and defensive tooling, and show the
+  work on <a href="https://www.youtube.com/@golemsec">GOLEM SEC</a>.</p>
+</div>
+</main>
+<footer>
+  <div>© 2026 Mr.GOLEM · no trackers, no cookies, no analytics.</div>
+  <div class="links">
+    <a href="https://github.com/M-GOLEM">GitHub</a>
+    <a href="https://www.youtube.com/@golemsec">YouTube</a>
+    <a href="https://hellstorm.blog">Blog</a>
+    <a href="/feed.xml">RSS</a>
+    <a href="mailto:golem-hack@agentmail.to">Email</a>
+  </div>
+</footer>
+</div></body>
+</html>
