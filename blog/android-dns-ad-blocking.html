@@ -3,30 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DNS ad blocking on Android without root: how VpnService filters work — Mr.GOLEM</title>
+<title>DNS ad blocking on Android without root: how VpnService filters work — Mr Sayrws</title>
 <meta name="description" content="Why a local VPN can block ads system-wide without root, what it sees, and the four cases where DNS filtering still loses.">
-<meta name="author" content="Mr.GOLEM">
-<link rel="canonical" href="https://m-golem.github.io/blog/android-dns-ad-blocking.html">
+<meta name="author" content="Mr Sayrws">
+<link rel="canonical" href="https://mrsayrws.github.io/blog/android-dns-ad-blocking.html">
 <meta property="og:type" content="article">
-<meta property="og:title" content="DNS ad blocking on Android without root: how VpnService filters work — Mr.GOLEM">
+<meta property="og:title" content="DNS ad blocking on Android without root: how VpnService filters work — Mr Sayrws">
 <meta property="og:description" content="Why a local VPN can block ads system-wide without root, what it sees, and the four cases where DNS filtering still loses.">
-<meta property="og:url" content="https://m-golem.github.io/blog/android-dns-ad-blocking.html">
-<meta property="og:image" content="https://m-golem.github.io/assets/og.png">
+<meta property="og:url" content="https://mrsayrws.github.io/blog/android-dns-ad-blocking.html">
+<meta property="og:image" content="https://mrsayrws.github.io/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://m-golem.github.io/assets/og.png">
-<link rel="alternate" type="application/rss+xml" title="Mr.GOLEM — Writing" href="https://m-golem.github.io/feed.xml">
+<meta name="twitter:image" content="https://mrsayrws.github.io/assets/og.png">
+<link rel="alternate" type="application/rss+xml" title="Mr Sayrws — Writing" href="https://mrsayrws.github.io/feed.xml">
 <link rel="stylesheet" href="/assets/site.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://m-golem.github.io/"}, {"@type": "ListItem", "position": 2, "name": "Writing", "item": "https://m-golem.github.io/blog/"}, {"@type": "ListItem", "position": 3, "name": "DNS ad blocking on Android without root: how VpnService filters work", "item": "https://m-golem.github.io/blog/android-dns-ad-blocking.html"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"DNS ad blocking on Android without root: how VpnService filters work","description":"Why a local VPN can block ads system-wide without root, what it sees, and the four cases where DNS filtering still loses.","url":"https://m-golem.github.io/blog/android-dns-ad-blocking.html","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Mr.GOLEM","url":"https://m-golem.github.io/","sameAs":["https://github.com/M-GOLEM","https://www.youtube.com/@golemsec"]},"publisher":{"@type":"Person","name":"Mr.GOLEM"},"mainEntityOfPage":"https://m-golem.github.io/blog/android-dns-ad-blocking.html","image":"https://m-golem.github.io/assets/og.png"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mrsayrws.github.io/"}, {"@type": "ListItem", "position": 2, "name": "Writing", "item": "https://mrsayrws.github.io/blog/"}, {"@type": "ListItem", "position": 3, "name": "DNS ad blocking on Android without root: how VpnService filters work", "item": "https://mrsayrws.github.io/blog/android-dns-ad-blocking.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"DNS ad blocking on Android without root: how VpnService filters work","description":"Why a local VPN can block ads system-wide without root, what it sees, and the four cases where DNS filtering still loses.","url":"https://mrsayrws.github.io/blog/android-dns-ad-blocking.html","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Mr Sayrws","url":"https://mrsayrws.github.io/","sameAs":["https://github.com/mrsayrws","https://www.youtube.com/@mrsayrws"]},"publisher":{"@type":"Person","name":"Mr Sayrws"},"mainEntityOfPage":"https://mrsayrws.github.io/blog/android-dns-ad-blocking.html","image":"https://mrsayrws.github.io/assets/og.png"}</script>
 </head>
 <body><div class="wrap">
 <nav class="top">
-  <a class="brand" href="/">Mr.GOLEM</a>
+  <a class="brand" href="/">Mr Sayrws</a>
   <a href="/">Home</a>
   <a href="/blog/">Writing</a>
   <a href="/press.html">Press</a>
-  <a href="https://github.com/M-GOLEM">GitHub</a>
-  <a href="https://www.youtube.com/@golemsec">YouTube</a>
+  <a href="https://github.com/mrsayrws">GitHub</a>
+  <a href="https://www.youtube.com/@mrsayrws">YouTube</a>
 </nav>
 <main>
 
@@ -109,24 +109,24 @@ ISP — still sees allowed queries. Moving DNS does not make you anonymous.</p>
 </ol>
 
 <div class="note"><strong>Tooling note.</strong>
-<a href="https://github.com/M-GOLEM/Ad-Blocker">Ad-Blocker</a> implements this
+<a href="https://github.com/mrsayrws/Ad-Blocker">Ad-Blocker</a> implements this
 model in Kotlin: a local <code>VpnService</code>, IPv4/UDP DNS parsing, hashed
 blocklists with binary search, three list levels and on-device statistics.</div>
 
-<p>A visual walkthrough is on <a href="https://www.youtube.com/@golemsec">GOLEM
+<p>A visual walkthrough is on <a href="https://www.youtube.com/@mrsayrws">GOLEM
 SEC</a>.</p>
 <div class="note" style="margin-top:34px"><strong>Read next</strong><ul style="margin:8px 0 0"><li><a href="/blog/discord-token-grabbers.html">Discord token grabbers</a></li><li><a href="/blog/adb-fastboot-windows-guide.html">ADB and fastboot on Windows</a></li><li><a href="/blog/totp-vault-dotnet.html">A TOTP vault in .NET</a></li></ul></div><div class="authorbox">
-  <img src="https://github.com/M-GOLEM.png" alt="Mr.GOLEM" width="64" height="64">
-  <p><strong>Mr.GOLEM</strong> — reverse engineer, malware analyst and YouTuber.
+  <img src="https://github.com/mrsayrws.png" alt="Mr Sayrws" width="64" height="64">
+  <p><strong>Mr Sayrws</strong> — reverse engineer, malware analyst and YouTuber.
   I write about binaries, Windows internals and defensive tooling, and show the
-  work on <a href="https://www.youtube.com/@golemsec">GOLEM SEC</a>.</p>
+  work on <a href="https://www.youtube.com/@mrsayrws">Mr Sayrws</a>.</p>
 </div>
 </main>
 <footer>
-  <div>© 2026 Mr.GOLEM · no trackers, no cookies, no analytics.</div>
+  <div>© 2026 Mr Sayrws · no trackers, no cookies, no analytics.</div>
   <div class="links">
-    <a href="https://github.com/M-GOLEM">GitHub</a>
-    <a href="https://www.youtube.com/@golemsec">YouTube</a>
+    <a href="https://github.com/mrsayrws">GitHub</a>
+    <a href="https://www.youtube.com/@mrsayrws">YouTube</a>
     <a href="https://hellstorm.blog">Blog</a>
     <a href="/feed.xml">RSS</a>
     <a href="mailto:golem-hack@agentmail.to">Email</a>
