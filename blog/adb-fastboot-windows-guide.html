@@ -3,30 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ADB and fastboot on Windows: a practical diagnostic guide — Mr.GOLEM</title>
+<title>ADB and fastboot on Windows: a practical diagnostic guide — Mr Sayrws</title>
 <meta name="description" content="Set up platform-tools, authorise the device, read the right properties and tell ADB, fastboot, download mode, EDL and preloader apart — without flashing anything.">
-<meta name="author" content="Mr.GOLEM">
-<link rel="canonical" href="https://m-golem.github.io/blog/adb-fastboot-windows-guide.html">
+<meta name="author" content="Mr Sayrws">
+<link rel="canonical" href="https://mrsayrws.github.io/blog/adb-fastboot-windows-guide.html">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ADB and fastboot on Windows: a practical diagnostic guide — Mr.GOLEM">
+<meta property="og:title" content="ADB and fastboot on Windows: a practical diagnostic guide — Mr Sayrws">
 <meta property="og:description" content="Set up platform-tools, authorise the device, read the right properties and tell ADB, fastboot, download mode, EDL and preloader apart — without flashing anything.">
-<meta property="og:url" content="https://m-golem.github.io/blog/adb-fastboot-windows-guide.html">
-<meta property="og:image" content="https://m-golem.github.io/assets/og.png">
+<meta property="og:url" content="https://mrsayrws.github.io/blog/adb-fastboot-windows-guide.html">
+<meta property="og:image" content="https://mrsayrws.github.io/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://m-golem.github.io/assets/og.png">
-<link rel="alternate" type="application/rss+xml" title="Mr.GOLEM — Writing" href="https://m-golem.github.io/feed.xml">
+<meta name="twitter:image" content="https://mrsayrws.github.io/assets/og.png">
+<link rel="alternate" type="application/rss+xml" title="Mr Sayrws — Writing" href="https://mrsayrws.github.io/feed.xml">
 <link rel="stylesheet" href="/assets/site.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://m-golem.github.io/"}, {"@type": "ListItem", "position": 2, "name": "Writing", "item": "https://m-golem.github.io/blog/"}, {"@type": "ListItem", "position": 3, "name": "ADB and fastboot on Windows: a practical diagnostic guide", "item": "https://m-golem.github.io/blog/adb-fastboot-windows-guide.html"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"ADB and fastboot on Windows: a practical diagnostic guide","description":"Set up platform-tools, authorise the device, read the right properties and tell ADB, fastboot, download mode, EDL and preloader apart — without flashing anything.","url":"https://m-golem.github.io/blog/adb-fastboot-windows-guide.html","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Mr.GOLEM","url":"https://m-golem.github.io/","sameAs":["https://github.com/M-GOLEM","https://www.youtube.com/@golemsec"]},"publisher":{"@type":"Person","name":"Mr.GOLEM"},"mainEntityOfPage":"https://m-golem.github.io/blog/adb-fastboot-windows-guide.html","image":"https://m-golem.github.io/assets/og.png"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mrsayrws.github.io/"}, {"@type": "ListItem", "position": 2, "name": "Writing", "item": "https://mrsayrws.github.io/blog/"}, {"@type": "ListItem", "position": 3, "name": "ADB and fastboot on Windows: a practical diagnostic guide", "item": "https://mrsayrws.github.io/blog/adb-fastboot-windows-guide.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"ADB and fastboot on Windows: a practical diagnostic guide","description":"Set up platform-tools, authorise the device, read the right properties and tell ADB, fastboot, download mode, EDL and preloader apart — without flashing anything.","url":"https://mrsayrws.github.io/blog/adb-fastboot-windows-guide.html","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Mr Sayrws","url":"https://mrsayrws.github.io/","sameAs":["https://github.com/mrsayrws","https://www.youtube.com/@mrsayrws"]},"publisher":{"@type":"Person","name":"Mr Sayrws"},"mainEntityOfPage":"https://mrsayrws.github.io/blog/adb-fastboot-windows-guide.html","image":"https://mrsayrws.github.io/assets/og.png"}</script>
 </head>
 <body><div class="wrap">
 <nav class="top">
-  <a class="brand" href="/">Mr.GOLEM</a>
+  <a class="brand" href="/">Mr Sayrws</a>
   <a href="/">Home</a>
   <a href="/blog/">Writing</a>
   <a href="/press.html">Press</a>
-  <a href="https://github.com/M-GOLEM">GitHub</a>
-  <a href="https://www.youtube.com/@golemsec">YouTube</a>
+  <a href="https://github.com/mrsayrws">GitHub</a>
+  <a href="https://www.youtube.com/@mrsayrws">YouTube</a>
 </nav>
 <main>
 
@@ -123,25 +123,25 @@ good way to break a working setup.</p>
 </ul>
 
 <div class="note"><strong>Tooling note.</strong>
-<a href="https://github.com/M-GOLEM/GOLEM-TABLET">GOLEM-TABLET</a> wraps exactly
+<a href="https://github.com/mrsayrws/GOLEM-TABLET">GOLEM-TABLET</a> wraps exactly
 this workflow on Windows: device-mode classification, ADB diagnostics, fastboot
 <code>getvar</code>, driver error codes, and validation of Samsung/Qualcomm
 firmware packages. It intentionally does <em>not</em> flash.</div>
 
 <p>The video version, including the mode-detection demo, is on
-<a href="https://www.youtube.com/@golemsec">GOLEM SEC</a>.</p>
+<a href="https://www.youtube.com/@mrsayrws">Mr Sayrws</a>.</p>
 <div class="note" style="margin-top:34px"><strong>Read next</strong><ul style="margin:8px 0 0"><li><a href="/blog/discord-token-grabbers.html">Discord token grabbers</a></li><li><a href="/blog/android-dns-ad-blocking.html">DNS ad blocking without root</a></li><li><a href="/blog/totp-vault-dotnet.html">A TOTP vault in .NET</a></li></ul></div><div class="authorbox">
-  <img src="https://github.com/M-GOLEM.png" alt="Mr.GOLEM" width="64" height="64">
-  <p><strong>Mr.GOLEM</strong> — reverse engineer, malware analyst and YouTuber.
+  <img src="https://github.com/mrsayrws.png" alt="Mr Sayrws" width="64" height="64">
+  <p><strong>Mr Sayrws</strong> — reverse engineer, malware analyst and YouTuber.
   I write about binaries, Windows internals and defensive tooling, and show the
-  work on <a href="https://www.youtube.com/@golemsec">GOLEM SEC</a>.</p>
+  work on <a href="https://www.youtube.com/@mrsayrws">Mr Sayrws</a>.</p>
 </div>
 </main>
 <footer>
-  <div>© 2026 Mr.GOLEM · no trackers, no cookies, no analytics.</div>
+  <div>© 2026 Mr Sayrws · no trackers, no cookies, no analytics.</div>
   <div class="links">
-    <a href="https://github.com/M-GOLEM">GitHub</a>
-    <a href="https://www.youtube.com/@golemsec">YouTube</a>
+    <a href="https://github.com/mrsayrws">GitHub</a>
+    <a href="https://www.youtube.com/@mrsayrws">YouTube</a>
     <a href="https://hellstorm.blog">Blog</a>
     <a href="/feed.xml">RSS</a>
     <a href="mailto:golem-hack@agentmail.to">Email</a>
