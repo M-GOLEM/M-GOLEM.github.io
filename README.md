@@ -1,7 +1,7 @@
-# m-golem.github.io
+# mrsayrws.github.io
 
-Source of the personal site at <https://m-golem.github.io/> - profile, projects
-and links for Mr.GOLEM.
+Source of the personal site at <https://mrsayrws.github.io/> — profile, technical
+writing and contact links for Mr Sayrws (mrsayrws).
 
 Static HTML and CSS only: no trackers, no cookies, no external JavaScript.
 
@@ -22,11 +22,11 @@ Static HTML and CSS only: no trackers, no cookies, no external JavaScript.
 ## Assets
 
 `assets/` holds the shared stylesheet, the social card (`og.png`), the YouTube
-channel banner and a thumbnail template. All images are PNG; the stylesheet is
-the only CSS file.
+channel banner and a thumbnail template. All images are PNG; `site.css` is the
+only stylesheet.
 
 ## Editing
 
-The pages are generated from plain HTML; there is no build step and no
-dependency. Open `index.html` in a browser to preview. Keep absolute paths
-(`/assets/...`) so the site works from the domain root.
+There is no build step and no dependency. Open `index.html` in a browser to
+preview. Keep absolute paths (`/assets/...`) so the site works from the domain
+root.
