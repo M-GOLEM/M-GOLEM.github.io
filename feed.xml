@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel>
-  <title>Mr.GOLEM — Writing</title>
-  <link>https://m-golem.github.io/blog/</link>
+  <title>Mr Sayrws — Writing</title>
+  <link>https://mrsayrws.github.io/blog/</link>
   <description>Reverse engineering, malware analysis and defensive tooling.</description>
   <language>en</language>
   <item>
     <title>How Discord token grabbers work — and how to stop them</title>
-    <link>https://m-golem.github.io/blog/discord-token-grabbers.html</link>
-    <guid>https://m-golem.github.io/blog/discord-token-grabbers.html</guid>
+    <link>https://mrsayrws.github.io/blog/discord-token-grabbers.html</link>
+    <guid>https://mrsayrws.github.io/blog/discord-token-grabbers.html</guid>
     <pubDate>Mon, 17 Nov 2026 09:00:00 +0200</pubDate>
     <description>A token is a bearer credential: whoever holds it is you. This is how grabbers find it, why file-only antivirus misses them, and the checks that actually help.</description>
   </item>
   <item>
     <title>ADB and fastboot on Windows: a practical diagnostic guide</title>
-    <link>https://m-golem.github.io/blog/adb-fastboot-windows-guide.html</link>
-    <guid>https://m-golem.github.io/blog/adb-fastboot-windows-guide.html</guid>
+    <link>https://mrsayrws.github.io/blog/adb-fastboot-windows-guide.html</link>
+    <guid>https://mrsayrws.github.io/blog/adb-fastboot-windows-guide.html</guid>
     <pubDate>Mon, 17 Nov 2026 09:00:00 +0200</pubDate>
     <description>Set up platform-tools, authorise the device, read the right properties and tell ADB, fastboot, download mode, EDL and preloader apart — without flashing anything.</description>
   </item>
   <item>
     <title>DNS ad blocking on Android without root: how VpnService filters work</title>
-    <link>https://m-golem.github.io/blog/android-dns-ad-blocking.html</link>
-    <guid>https://m-golem.github.io/blog/android-dns-ad-blocking.html</guid>
+    <link>https://mrsayrws.github.io/blog/android-dns-ad-blocking.html</link>
+    <guid>https://mrsayrws.github.io/blog/android-dns-ad-blocking.html</guid>
     <pubDate>Mon, 17 Nov 2026 09:00:00 +0200</pubDate>
     <description>Why a local VPN can block ads system-wide without root, what it sees, and the four cases where DNS filtering still loses.</description>
   </item>
   <item>
     <title>Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits</title>
-    <link>https://m-golem.github.io/blog/totp-vault-dotnet.html</link>
-    <guid>https://m-golem.github.io/blog/totp-vault-dotnet.html</guid>
+    <link>https://mrsayrws.github.io/blog/totp-vault-dotnet.html</link>
+    <guid>https://mrsayrws.github.io/blog/totp-vault-dotnet.html</guid>
     <pubDate>Mon, 17 Nov 2026 09:00:00 +0200</pubDate>
     <description>The math behind six-digit codes, how to store the shared secrets, and why a hard-coded PIN check quietly ruins the whole design.</description>
   </item>
