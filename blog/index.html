@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writing — Mr.GOLEM</title>
+<meta name="description" content="Technical notes on reverse engineering, malware analysis, Windows internals and defensive tooling by Mr.GOLEM.">
+<meta name="author" content="Mr.GOLEM">
+<link rel="canonical" href="https://m-golem.github.io/blog/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Writing — Mr.GOLEM">
+<meta property="og:description" content="Technical notes on reverse engineering, malware analysis, Windows internals and defensive tooling by Mr.GOLEM.">
+<meta property="og:url" content="https://m-golem.github.io/blog/">
+<meta property="og:image" content="https://m-golem.github.io/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://m-golem.github.io/assets/og.png">
+<link rel="alternate" type="application/rss+xml" title="Mr.GOLEM — Writing" href="https://m-golem.github.io/feed.xml">
+<link rel="stylesheet" href="/assets/site.css">
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Blog","name":"Mr.GOLEM — Writing","url":"https://m-golem.github.io/blog/","author":{"@type":"Person","name":"Mr.GOLEM"}}</script>
+</head>
+<body><div class="wrap">
+<nav class="top">
+  <a class="brand" href="/">Mr.GOLEM</a>
+  <a href="/">Home</a>
+  <a href="/blog/">Writing</a>
+  <a href="/press.html">Press</a>
+  <a href="https://github.com/M-GOLEM">GitHub</a>
+  <a href="https://www.youtube.com/@golemsec">YouTube</a>
+</nav>
+<main>
+
+<h1>Writing</h1>
+<div class="meta">Reverse engineering · Windows internals · defensive tooling</div>
+<p class="lead">Long-form notes that go with the videos: what the mechanism is,
+where it breaks, and what actually helps. No exploit recipes.</p>
+<div class="grid">
+    <a class="card" href="/blog/discord-token-grabbers.html">
+      <h3>How Discord token grabbers work — and how to stop them</h3>
+      <p>A token is a bearer credential: whoever holds it is you. This is how grabbers find it, why file-only antivirus misses them, and the checks that actually help.</p>
+    </a>
+    <a class="card" href="/blog/adb-fastboot-windows-guide.html">
+      <h3>ADB and fastboot on Windows: a practical diagnostic guide</h3>
+      <p>Set up platform-tools, authorise the device, read the right properties and tell ADB, fastboot, download mode, EDL and preloader apart — without flashing anything.</p>
+    </a>
+    <a class="card" href="/blog/android-dns-ad-blocking.html">
+      <h3>DNS ad blocking on Android without root: how VpnService filters work</h3>
+      <p>Why a local VPN can block ads system-wide without root, what it sees, and the four cases where DNS filtering still loses.</p>
+    </a>
+    <a class="card" href="/blog/totp-vault-dotnet.html">
+      <h3>Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits</h3>
+      <p>The math behind six-digit codes, how to store the shared secrets, and why a hard-coded PIN check quietly ruins the whole design.</p>
+    </a>
+</div>
+<div class="authorbox">
+  <img src="https://github.com/M-GOLEM.png" alt="Mr.GOLEM" width="64" height="64">
+  <p><strong>Mr.GOLEM</strong> — reverse engineer, malware analyst and YouTuber.
+  I write about binaries, Windows internals and defensive tooling, and show the
+  work on <a href="https://www.youtube.com/@golemsec">GOLEM SEC</a>.</p>
+</div>
+
+</main>
+<footer>
+  <div>© 2026 Mr.GOLEM · no trackers, no cookies, no analytics.</div>
+  <div class="links">
+    <a href="https://github.com/M-GOLEM">GitHub</a>
+    <a href="https://www.youtube.com/@golemsec">YouTube</a>
+    <a href="https://hellstorm.blog">Blog</a>
+    <a href="/feed.xml">RSS</a>
+    <a href="mailto:golem-hack@agentmail.to">Email</a>
+  </div>
+</footer>
+</div></body>
+</html>
