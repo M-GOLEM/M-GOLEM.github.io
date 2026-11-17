@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits — Mr.GOLEM</title>
+<meta name="description" content="The math behind six-digit codes, how to store the shared secrets, and why a hard-coded PIN check quietly ruins the whole design.">
+<meta name="author" content="Mr.GOLEM">
+<link rel="canonical" href="https://m-golem.github.io/blog/totp-vault-dotnet.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits — Mr.GOLEM">
+<meta property="og:description" content="The math behind six-digit codes, how to store the shared secrets, and why a hard-coded PIN check quietly ruins the whole design.">
+<meta property="og:url" content="https://m-golem.github.io/blog/totp-vault-dotnet.html">
+<meta property="og:image" content="https://m-golem.github.io/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://m-golem.github.io/assets/og.png">
+<link rel="alternate" type="application/rss+xml" title="Mr.GOLEM — Writing" href="https://m-golem.github.io/feed.xml">
+<link rel="stylesheet" href="/assets/site.css">
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Building a TOTP vault in .NET: AES-GCM, PBKDF2 and the limits","description":"The math behind six-digit codes, how to store the shared secrets, and why a hard-coded PIN check quietly ruins the whole design.","url":"https://m-golem.github.io/blog/totp-vault-dotnet.html","datePublished":"2026-11-17","dateModified":"2026-11-17","author":{"@type":"Person","name":"Mr.GOLEM","url":"https://m-golem.github.io/","sameAs":["https://github.com/M-GOLEM","https://www.youtube.com/@golemsec"]},"publisher":{"@type":"Person","name":"Mr.GOLEM"},"mainEntityOfPage":"https://m-golem.github.io/blog/totp-vault-dotnet.html","image":"https://m-golem.github.io/assets/og.png"}</script>
+</head>
+<body><div class="wrap">
+<nav class="top">
+  <a class="brand" href="/">Mr.GOLEM</a>
+  <a href="/">Home</a>
+  <a href="/blog/">Writing</a>
+  <a href="/press.html">Press</a>
+  <a href="https://github.com/M-GOLEM">GitHub</a>
+  <a href="https://www.youtube.com/@golemsec">YouTube</a>
+</nav>
+<main>
+
+<h1>Building a TOTP vault in .NET: <span>AES-GCM, PBKDF2 and the limits</span></h1>
+<div class="meta">.NET · 17 Nov 2026 · 9 min read</div>
+
+<p class="lead">TOTP looks like magic: a six-digit code that changes every 30
+seconds, derived from a shared secret and the clock. The algorithm is small. The
+hard part is storing the secret without weakening it.</p>
+
+<h2>1. The code is an HMAC</h2>
+<p>RFC 6238 builds on RFC 4226 (HOTP). With a base32-decoded secret
+<code>K</code> and time step <code>T = floor(unixSeconds / 30)</code>:</p>
+<pre><code>H = HMAC-SHA1(K, T as 8-byte big-endian)
+offset = H[19] &amp; 0x0F
+code = ((H[offset] &amp; 0x7F) &lt;&lt; 24
+      | H[offset+1] &lt;&lt; 16
+      | H[offset+2] &lt;&lt; 8
+      | H[offset+3]) % 1_000_000</code></pre>
+<p>Pad to six digits. SHA-1 is not a weakness here — HMAC-SHA1 remains fine for
+this construction — but many servers now accept SHA-256 or SHA-512 and 8 digits.</p>
+<p>Two practical details:</p>
+<ul>
+  <li><strong>Clock skew.</strong> Servers usually accept the previous, current
+  and next window. A device more than ~30 seconds off will fail.</li>
+  <li><strong>Replay.</strong> A code is valid for the whole window. The server
+  must remember used codes if replay matters.</li>
+</ul>
+
+<h2>2. Storing the secret</h2>
+<p>A TOTP seed is as sensitive as a password that never expires. Encrypt the
+whole vault, not individual fields:</p>
+<ul>
+  <li><strong>KDF:</strong> PBKDF2-HMAC-SHA512 with a random 32-byte salt and a
+  high iteration count (300,000 is a reasonable 2026 baseline). Argon2id is better
+  if the platform allows it.</li>
+  <li><strong>Cipher:</strong> AES-256-GCM, a fresh 12-byte nonce per save, and
+  the 16-byte tag stored with the ciphertext.</li>
+  <li><strong>Layout:</strong> salt ‖ nonce ‖ tag ‖ ciphertext. Version it so you
+  can migrate later.</li>
+  <li><strong>Writes:</strong> write to a temp file, flush, then replace. A
+  half-written vault is a lost vault.</li>
+</ul>
+<p>Do not invent your own construction, and do not use AES-CBC without a MAC.</p>
+
+<h2>3. Where designs fail</h2>
+<h3>The PIN check is part of the crypto</h3>
+<p>A common mistake is to verify the PIN against a hash constant compiled into
+the application, then derive the vault key from whatever the user typed. If the
+constant is the real gate, the key derivation adds nothing: anyone with the
+source knows which PIN opens the vault.</p>
+<p>Fix: derive a <em>verification key</em> from the password with the same KDF,
+store only an HMAC of a fixed string under that key, and use a separate derived
+key for encryption. The password never exists as a constant, and changing it
+means re-encrypting, not editing source.</p>
+<h3>Comparing secrets with <code>==</code></h3>
+<p>String equality exits early. Use a fixed-time comparison for tags and
+verifiers. In .NET, <code>CryptographicOperations.FixedTimeEquals</code>.</p>
+<h3>No backup, no recovery</h3>
+<p>If the vault file and the password are both required and neither has a backup
+path, one disk failure locks the user out of every account. Offer an encrypted
+export, and tell users to store provider recovery codes separately.</p>
+<h3>Secrets in memory forever</h3>
+<p>Once decrypted, seeds live in managed strings that the GC may copy. You can
+reduce exposure with <code>byte[]</code>, <code>CryptographicOperations.ZeroMemory</code>
+and short unlock sessions, but you cannot fully defend against a process with
+debug rights. Be honest about that in the threat model.</p>
+
+<h2>4. What TOTP does not stop</h2>
+<ul>
+  <li><strong>Real-time phishing.</strong> A proxy can ask for the code and use it
+  immediately. Passkeys/WebAuthn are the answer; TOTP is not.</li>
+  <li><strong>Malware on the unlocked machine.</strong> If the vault is open, the
+  seeds are readable.</li>
+  <li><strong>Account recovery attacks.</strong> The weakest link is often the
+  email or SMS fallback, not the code.</li>
+</ul>
+<p>For high-value accounts, use a hardware security key. TOTP is a solid second
+factor, not a substitute for one.</p>
+
+<h2>5. A sane checklist</h2>
+<ol>
+  <li>Base32 decode strictly; reject bad padding and non-alphabet characters.</li>
+  <li>PBKDF2/Argon2id with a random salt, stored with the ciphertext.</li>
+  <li>AES-GCM with a unique nonce per encryption.</li>
+  <li>Fixed-time comparisons for tags and PIN verifiers.</li>
+  <li>Atomic writes and a documented backup/export path.</li>
+  <li>A written threat model that admits memory scraping and phishing.</li>
+</ol>
+
+<div class="note"><strong>Tooling note.</strong>
+<a href="https://github.com/M-GOLEM/App2FA">App2FA</a> is my WinForms TOTP vault:
+RFC 6238 codes, AES-256-GCM, PBKDF2-SHA512 at 300k iterations, QR import and
+offline storage. Its README also documents the hard-coded PIN check that makes it
+a personal tool rather than a hardened product — read that before trusting it
+with real accounts.</div>
+
+<p>The video breakdown is on <a href="https://www.youtube.com/@golemsec">GOLEM
+SEC</a>.</p>
+<div class="authorbox">
+  <img src="https://github.com/M-GOLEM.png" alt="Mr.GOLEM" width="64" height="64">
+  <p><strong>Mr.GOLEM</strong> — reverse engineer, malware analyst and YouTuber.
+  I write about binaries, Windows internals and defensive tooling, and show the
+  work on <a href="https://www.youtube.com/@golemsec">GOLEM SEC</a>.</p>
+</div>
+</main>
+<footer>
+  <div>© 2026 Mr.GOLEM · no trackers, no cookies, no analytics.</div>
+  <div class="links">
+    <a href="https://github.com/M-GOLEM">GitHub</a>
+    <a href="https://www.youtube.com/@golemsec">YouTube</a>
+    <a href="https://hellstorm.blog">Blog</a>
+    <a href="/feed.xml">RSS</a>
+    <a href="mailto:golem-hack@agentmail.to">Email</a>
+  </div>
+</footer>
+</div></body>
+</html>
