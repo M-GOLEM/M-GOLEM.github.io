@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BuildForge — universal build console for Windows</title>
+<meta name="description" content="BuildForge detects any project — C/C++, CMake, ESP-IDF, .NET, Rust, Go, Node, Python, Arduino and more — builds it fast, and explains every compiler error with file, line, why and fix. Free Windows app by Mr Sayrws.">
+<meta name="author" content="Mr Sayrws">
+<meta name="keywords" content="BuildForge, build tool, Windows build console, CMake GUI, ESP-IDF build, compiler error explainer, Mr Sayrws, mrsayrws">
+<link rel="canonical" href="https://mrsayrws.github.io/buildforge/">
+<link rel="me" href="https://github.com/mrsayrws">
+<link rel="me" href="https://www.youtube.com/@mrsayrws">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BuildForge — build anything, understand every error">
+<meta property="og:description" content="One dark Windows console that detects the project type, builds it, and turns compiler output into file, line, why and fix.">
+<meta property="og:url" content="https://mrsayrws.github.io/buildforge/">
+<meta property="og:image" content="https://mrsayrws.github.io/assets/buildforge/build.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BuildForge — universal build console">
+<meta name="twitter:description" content="Detects 17 project types, builds them, explains every error. Free for Windows 10/11.">
+<meta name="twitter:image" content="https://mrsayrws.github.io/assets/buildforge/build.png">
+<link rel="alternate" type="application/rss+xml" title="Mr Sayrws — Writing" href="https://mrsayrws.github.io/feed.xml">
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+  figure { margin: 0 0 20px; }
+  figure img { width: 100%; display: block; border: 1px solid var(--line); background: var(--panel); }
+  figcaption { color: var(--muted); font-size: 13px; padding: 8px 2px 0; }
+  .shots { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; margin: 0 0 6px; }
+  @media (max-width: 700px) { .shots { grid-template-columns: 1fr; } }
+  .kicker { color: var(--green); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 20px; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--green); font-weight: 400; letter-spacing: .06em; text-transform: uppercase; font-size: 11px; }
+  td code { white-space: nowrap; }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "BuildForge",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Windows 10, Windows 11",
+  "description": "Universal build console that detects the project type, builds it fast, and explains every compiler error with file, line, cause and fix.",
+  "url": "https://mrsayrws.github.io/buildforge/",
+  "downloadUrl": "https://github.com/mrsayrws/BuildForge/releases/download/v1.1.0/BuildForge-1.1.0-win64.zip",
+  "softwareVersion": "1.1.0",
+  "author": { "@type": "Person", "name": "Mr Sayrws", "url": "https://mrsayrws.github.io/" },
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "screenshot": "https://mrsayrws.github.io/assets/buildforge/build.png",
+  "sameAs": "https://github.com/mrsayrws/BuildForge"
+}
+</script>
+</head>
+<body><div class="wrap">
+<nav class="top">
+  <a class="brand" href="/">Mr Sayrws</a>
+  <a href="/">Home</a>
+  <a href="/buildforge/">BuildForge</a>
+  <a href="/blog/">Writing</a>
+  <a href="/press.html">Press</a>
+  <a href="https://github.com/mrsayrws">GitHub</a>
+  <a href="https://www.youtube.com/@mrsayrws">YouTube</a>
+</nav>
+<main>
+
+<div class="kicker">Free · Windows 10/11 · v1.1.0</div>
+<h1>Build anything.<br><span>Understand every error.</span></h1>
+<p class="lead">
+  One dark console that detects what a folder actually is — C/C++, CMake,
+  ESP-IDF firmware, .NET, Rust, Go, Node, Python, Arduino and more — runs the
+  right build, and turns compiler noise into <strong>file:line, why it happened
+  and how to fix it</strong>.
+</p>
+<div class="cta">
+  <a class="btn primary" href="https://github.com/mrsayrws/BuildForge/releases/download/v1.1.0/BuildForge-1.1.0-win64.zip">Download 1.1.0 (9.2 MB)</a>
+  <a class="btn" href="https://github.com/mrsayrws/BuildForge">Source on GitHub</a>
+  <a class="btn" href="https://github.com/mrsayrws/BuildForge/releases">Release notes</a>
+</div>
+<p class="note">
+  Portable onedir app: extract the zip and run <code>BuildForge.exe</code>.
+  No installer, no services, no registry writes. Settings live in
+  <code>%APPDATA%\BuildForge</code> and uninstalling is deleting the folder.
+</p>
+
+<figure>
+  <img src="/assets/buildforge/build.png" alt="BuildForge window: a real C++ project built successfully, with the exact g++ command and build time in a dark console">
+  <figcaption>A real build, not a mockup — the full g++ command and the timing, in the Build tab.</figcaption>
+</figure>
+
+<h2>01 // it detects the stack itself</h2>
+<p>
+  BuildForge reads the files in the folder and stops at the first real marker,
+  so an ESP-IDF firmware tree is never mistaken for a desktop CMake project.
+  If you pick a wrapper folder that holds exactly one project, it opens that
+  project and tells you where it found it.
+</p>
+<table>
+  <tr><th>Project</th><th>What it runs</th></tr>
+  <tr><td>C / C++</td><td><code>g++ -std=c++20</code> release <code>-O2</code> / debug <code>-O0 -g</code></td></tr>
+  <tr><td>CMake</td><td>configure once (Ninja + local g++ when MSVC is absent), then <code>cmake --build</code></td></tr>
+  <tr><td>ESP-IDF</td><td><code>idf.py -B build -j N build</code> with the target read from <code>sdkconfig</code></td></tr>
+  <tr><td>PlatformIO / Arduino</td><td><code>pio run</code> / <code>arduino-cli compile --fqbn</code></td></tr>
+  <tr><td>Meson / Bazel / qmake</td><td><code>meson compile</code> / <code>bazel build</code> / <code>qmake</code> + <code>make</code></td></tr>
+  <tr><td>.NET / MSVC</td><td><code>dotnet build -c Release</code> / <code>msbuild /m</code></td></tr>
+  <tr><td>Node / Python / Rust / Go</td><td><code>npm run build</code>, <code>compileall</code>, <code>cargo build</code>, <code>go build</code></td></tr>
+  <tr><td>Maven / Gradle / Make</td><td><code>mvn package</code>, <code>gradle build</code> (or <code>gradlew</code>), <code>make -jN</code></td></tr>
+  <tr><td>Anything else</td><td>your custom command, with an explanation instead of a dead button</td></tr>
+</table>
+
+<figure>
+  <img src="/assets/buildforge/detect.png" alt="BuildForge detecting an ESP-IDF firmware project inside a wrapper folder, showing the esp-idf badge and the esp32 target">
+  <figcaption>ESP-IDF detected through a wrapper folder: badge, build system and chip target, before a single byte is compiled.</figcaption>
+</figure>
+
+<h2>02 // errors become explanations</h2>
+<p>
+  GCC, MSBuild, Python, Rust, npm and CMake output is parsed into a Problems
+  table. Each row carries the file and line, the raw message, <em>why</em> the
+  compiler is complaining and the exact <em>fix</em>. Double-click opens the
+  line in VS Code.
+</p>
+<div class="shots">
+  <figure>
+    <img src="/assets/buildforge/problems.png" alt="Problems tab showing a missing semicolon with WHY and FIX explanations and the source line">
+    <figcaption>One missing semicolon: the row, the WHY, the FIX, the raw line.</figcaption>
+  </figure>
+  <figure>
+    <img src="/assets/buildforge/toolchains.png" alt="Toolchains tab listing 25 build tools, versions, paths and which ones are missing">
+    <figcaption>25 tools scanned. Missing compilers are called out before the build starts.</figcaption>
+  </figure>
+</div>
+<pre><code>main.cpp:6:35: error: expected ';' before 'std'
+WHY  C++ syntax error: a statement is not terminated.
+FIX  Add the missing semicolon on the reported line or the line before it.</code></pre>
+
+<h2>03 // toolchains and PATH</h2>
+<p>
+  BuildForge scans 25 tools at startup, rebuilds <code>PATH</code> from the
+  registry so a compiler installed after login works without a reboot, and
+  refuses to start a build when the compiler for that project is missing.
+  Missing tools show the exact <code>winget</code> command — for ESP-IDF it is
+  <code>winget install --id Espressif.EIM-CLI</code> then <code>eim install</code>.
+</p>
+
+<h2>04 // download and run</h2>
+<ol>
+  <li>Download <a href="https://github.com/mrsayrws/BuildForge/releases/download/v1.1.0/BuildForge-1.1.0-win64.zip">BuildForge-1.1.0-win64.zip</a>.</li>
+  <li>Extract the folder anywhere and run <code>BuildForge.exe</code>.</li>
+  <li>Add your project folder — the type, plan and toolchain check appear immediately.</li>
+  <li>Press <strong>BUILD</strong>. Output streams live; errors land in the Problems tab.</li>
+</ol>
+
+<h2>05 // command line, same engine</h2>
+<p>The GUI is a client of the same engine, so scripts can use it too:</p>
+<pre><code>buildforge --detect C:\path\to\project --json
+buildforge --build C:\path\to\project --debug --jobs 8
+buildforge --build . --custom "pytest -q" --timeout 900
+buildforge --doctor</code></pre>
+
+<h2>06 // honest limits</h2>
+<ul>
+  <li><strong>ESP-IDF needs the SDK separately.</strong> Detection and the build
+    plan work without it; the app shows the install commands instead of failing
+    cryptically.</li>
+  <li><strong>Plain C/C++ folders are one compiler invocation per build.</strong>
+    Great for small tools; large C++ trees belong in CMake or Make, where only
+    changed files are rebuilt.</li>
+  <li><strong>Windows only.</strong> The console is built on Tkinter and targets
+    Windows 10/11 toolchains (MSVC, w64devkit, .NET, Node).</li>
+</ul>
+
+<h2>07 // verified, not promised</h2>
+<p>
+  83 automated tests cover detection fixtures for every supported stack,
+  diagnostics samples for each compiler, command construction (including
+  ESP-IDF targets and stale-cache handling), runner streaming, failure and
+  cancel paths, toolchain preflight and Tk smoke tests. Every screenshot on
+  this page was captured from the 1.1.0 build running real projects.
+</p>
+<div class="cta">
+  <a class="btn primary" href="https://github.com/mrsayrws/BuildForge/releases/download/v1.1.0/BuildForge-1.1.0-win64.zip">Download BuildForge 1.1.0</a>
+  <a class="btn" href="https://github.com/mrsayrws/BuildForge#readme">Read the README</a>
+</div>
+
+</main>
+
+<footer>
+  <div>© <span id="year">2026</span> Mr Sayrws · built in Egypt · no trackers, no cookies, no analytics.</div>
+  <div class="links">
+    <a href="https://github.com/mrsayrws/BuildForge">BuildForge on GitHub</a>
+    <a href="https://github.com/mrsayrws">GitHub</a>
+    <a href="https://www.youtube.com/@mrsayrws">YouTube</a>
+    <a href="/press.html">Press</a>
+    <a href="mailto:golem-hack@agentmail.to">Email</a>
+  </div>
+</footer>
+
+</div>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>
